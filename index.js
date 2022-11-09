@@ -9,9 +9,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-//username - react_photgraphyDB
-//password - ouMuOI1yzWo0qjR3
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.b8vg83y.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -57,6 +54,7 @@ async function run() {
       const reviews = await cursor.toArray();
       res.send(reviews);
     });
+
     app.delete("/reviews/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -86,6 +84,11 @@ async function run() {
         updateUser,
         options
       );
+      res.send(result);
+    });
+    app.post("/service", async (req, res) => {
+      const service = req.body;
+      const result = await serviceCollection.insertOne(service);
       res.send(result);
     });
   } finally {
