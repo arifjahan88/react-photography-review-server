@@ -57,7 +57,6 @@ async function run() {
       res.send(services);
     });
     app.get("/service", async (req, res) => {
-      console.log(req);
       const query = {};
       const cursor = serviceCollection.find(query).sort({ timestamp: -1 });
       const services = await cursor.toArray();
