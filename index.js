@@ -28,6 +28,7 @@ function verifyjwt(req, res, next) {
     res.status(403).send({ Message: "UnAuthorized Access" });
   }
   const token = authheaders.split(" ")[1];
+  console.log(token);
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (error, decoded) {
     if (error) {
       res.status(401).send({ Message: "Un Authorized Access" });
@@ -45,7 +46,7 @@ async function run() {
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "2hr",
+        expiresIn: "5hr",
       });
       res.send({ token });
     });
