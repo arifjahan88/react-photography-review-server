@@ -22,26 +22,29 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-function verifyjwt(req, res, next) {
-  const authheaders = req.headers.authorization;
-  if (!authheaders) {
-    res.status(403).send({ Message: "UnAuthorized Access" });
-  }
-  const token = authheaders.split(" ")[1];
-  console.log(token);
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (error, decoded) {
-    if (error) {
-      res.status(401).send({ Message: "Un Authorized Access" });
-    }
-    req.decoded = decoded;
-    next();
-  });
-}
-
 async function run() {
   try {
     const serviceCollection = client.db("photographtDB").collection("service");
     const reviewCollection = client.db("photographtDB").collection("review");
+
+    function verifyjwt(req, res, next) {
+      const authheaders = req.headers.authorization;
+      if (!authheaders) {
+        res.status(403).send({ Message: "UnAuthorized Access" });
+      }
+      const token = authheaders.split(" ")[1];
+      jwt.verify(
+        token,
+        process.env.ACCESS_TOKEN_SECRET,
+        function (error, decoded) {
+          if (error) {
+            res.status(401).send({ Message: "Un Authorized Access" });
+          }
+          req.decoded = decoded;
+          next();
+        }
+      );
+    }
 
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -89,6 +92,7 @@ async function run() {
       const reviews = await cursor.toArray();
       res.send(reviews);
     });
+
     app.get("/reviewsall", verifyjwt, async (req, res) => {
       const query = {};
       const cursor = reviewCollection.find(query);
@@ -102,12 +106,14 @@ async function run() {
       const result = await reviewCollection.deleteOne(query);
       res.send(result);
     });
-    app.get("/updatereviews/:id", verifyjwt, async (req, res) => {
+
+    app.get("/updatereviews/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await reviewCollection.findOne(query);
       res.send(result);
     });
+
     app.put("/updatereviews/:id", verifyjwt, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -127,6 +133,7 @@ async function run() {
       );
       res.send(result);
     });
+
     app.post("/service", async (req, res) => {
       const service = req.body;
       const result = await serviceCollection.insertOne(service);
@@ -138,9 +145,9 @@ async function run() {
 run().catch((err) => console.error(err));
 
 app.get("/", (req, res) => {
-  res.send("Volunteer network Server is running");
+  res.send("PhotoGraphy network Server is running");
 });
 
 app.listen(port, () => {
-  console.log(`Volunteer server is running in port ${port}`);
+  console.log(`PhotoGraphy server is running in port ${port}`);
 });
